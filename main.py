@@ -2,9 +2,11 @@ def Random():
     while not (inMenu):
         led.toggle(randint(0, 4), randint(0, 4))
         basic.pause(10)
+def Circles():
+    basic.show_icon(IconNames.DIAMOND,10)
 def IncrementMode():
     global mode
-    if inMenu:
+    if inMenu or inDemoMode:
         music.play_tone(523, music.beat(BeatFraction.SIXTEENTH))
         if mode >= len(modeOptions) - 1:
             mode = 0
@@ -31,37 +33,45 @@ def Solid(red: number, green: number, blue: number):
         basic.pause(10)
 
 def on_logo_pressed():
-    global inMenu
+    global inDemoMode, inMenu
     music.play_tone(988, music.beat(BeatFraction.SIXTEENTH))
+    if inMenu:
+        if modeOptions[mode] == "Demo":
+            inDemoMode = not (inDemoMode)
+            IncrementMode()
     inMenu = not (inMenu)
 input.on_logo_event(TouchButtonEvent.PRESSED, on_logo_pressed)
 
 def DecrementMode():
     global mode
-    if inMenu:
+    if inMenu or inDemoMode:
         music.play_tone(262, music.beat(BeatFraction.SIXTEENTH))
         if mode <= 0:
             mode = len(modeOptions) - 1
         else:
             mode += -1
+inDemoMode = False
 inMenu = False
 modeOptions: List[str] = []
 mode = 0
 inMenu = True
 inDemoMode = False
-demoDuration = 2
-loopNumber = 0
+demoDuration = 5
 tileDisplay = Kitronik_Zip_Tile.create_zip_tile_display(1, 1, Kitronik_Zip_Tile.UBitLocations.HIDDEN)
 tileDisplay.clear()
 tileDisplay.show()
-modeOptions = ["Rnd", "Sweep", "Circles", "Solid", "Demo"]
+modeOptions = ["Rnd", "Solid", "Demo"]
 mode = 0
 
 def on_every_interval():
+    global inMenu
     if inDemoMode:
         IncrementMode()
         if modeOptions[mode] == "Demo":
             IncrementMode()
+        inMenu = True
+        basic.pause(1000)
+        inMenu = False
 loops.every_interval(demoDuration * 1000, on_every_interval)
 
 def on_every_interval2():
@@ -77,5 +87,7 @@ def on_forever():
                 Random()
             elif modeOptions[mode] == "Solid":
                 Solid(125, 125, 0)
-            basic.pause(10)
+            elif modeOptions[mode] == "Circles":
+                pass
+        basic.pause(100)
 basic.forever(on_forever)

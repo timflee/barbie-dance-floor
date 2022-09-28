@@ -4,6 +4,9 @@ function Random () {
         basic.pause(10)
     }
 }
+function Circles () {
+    basic.showIcon(IconNames.Diamond, 10)
+}
 function IncrementMode () {
     if (inMenu || inDemoMode) {
         music.playTone(523, music.beat(BeatFraction.Sixteenth))
@@ -34,9 +37,12 @@ function Solid (red: number, green: number, blue: number) {
 }
 input.onLogoEvent(TouchButtonEvent.Pressed, function () {
     music.playTone(988, music.beat(BeatFraction.Sixteenth))
+    if (inDemoMode) {
+        inDemoMode = false
+    }
     if (inMenu) {
         if (modeOptions[mode] == "Demo") {
-            inDemoMode = !(inDemoMode)
+            inDemoMode = true
             IncrementMode()
         }
     }
@@ -54,15 +60,20 @@ function DecrementMode () {
 }
 let inDemoMode = false
 let inMenu = false
-let modeOptions : string[] = []
 let mode = 0
+let modeOptions : string[] = []
 inMenu = true
 inDemoMode = false
 let demoDuration = 5
 let tileDisplay = Kitronik_Zip_Tile.createZIPTileDisplay(1, 1, Kitronik_Zip_Tile.UBitLocations.Hidden)
 tileDisplay.clear()
 tileDisplay.show()
-modeOptions = ["Rnd", "Solid", "Demo"]
+modeOptions = [
+"Rnd",
+"Solid",
+"Circles",
+"Demo"
+]
 mode = 0
 loops.everyInterval(demoDuration * 1000, function () {
     if (inDemoMode) {
@@ -88,6 +99,8 @@ basic.forever(function () {
                 Random()
             } else if (modeOptions[mode] == "Solid") {
                 Solid(125, 125, 0)
+            } else if (modeOptions[mode] == "Circles") {
+                Circles()
             }
         }
         basic.pause(100)
