@@ -1,70 +1,95 @@
 function Random () {
     while (!(inMenu)) {
-        basic.pause(100)
+        led.toggle(randint(0, 4), randint(0, 4))
+        basic.pause(10)
     }
 }
-input.onButtonPressed(Button.A, function () {
-    if (inMenu) {
-        if (mode <= 0) {
-            mode = modeOptions.length - 1
-        } else {
-            mode += -1
-        }
-    }
-})
-input.onButtonPressed(Button.B, function () {
-    if (inMenu) {
+function IncrementMode () {
+    if (inMenu || inDemoMode) {
+        music.playTone(523, music.beat(BeatFraction.Sixteenth))
         if (mode >= modeOptions.length - 1) {
             mode = 0
         } else {
             mode += 1
         }
     }
+}
+input.onButtonPressed(Button.A, function () {
+    DecrementMode()
 })
-function Solid (num: number, num2: number, num3: number) {
-    tileDisplay.showColor(Kitronik_Zip_Tile.rgb(255, 255, 255))
-    tileDisplay.show()
+input.onButtonPressed(Button.B, function () {
+    IncrementMode()
+})
+function Solid (red: number, green: number, blue: number) {
+    basic.showLeds(`
+        # # # # #
+        # # # # #
+        # # # # #
+        # # # # #
+        # # # # #
+        `)
+    while (!(inMenu)) {
+        basic.pause(10)
+    }
 }
 input.onLogoEvent(TouchButtonEvent.Pressed, function () {
-    inMenu = !(inMenu)
-    if (!(inMenu)) {
-        if (modeOptions[mode] == "Random") {
-            Random()
-        } else if (modeOptions[mode] == "Solid") {
-            Solid(125, 125, 0)
+    music.playTone(988, music.beat(BeatFraction.Sixteenth))
+    if (inMenu) {
+        if (modeOptions[mode] == "Demo") {
+            inDemoMode = !(inDemoMode)
+            IncrementMode()
         }
     }
+    inMenu = !(inMenu)
 })
+function DecrementMode () {
+    if (inMenu || inDemoMode) {
+        music.playTone(262, music.beat(BeatFraction.Sixteenth))
+        if (mode <= 0) {
+            mode = modeOptions.length - 1
+        } else {
+            mode += -1
+        }
+    }
+}
+let inDemoMode = false
 let inMenu = false
+let modeOptions : string[] = []
 let mode = 0
-let modeOptions: string[] = []
-let tileDisplay: Kitronik_Zip_Tile.ZIPTileDisplay = null
-tileDisplay = Kitronik_Zip_Tile.createZIPTileDisplay(1, 1, Kitronik_Zip_Tile.UBitLocations.Hidden)
-modeOptions = [
-"Random",
-"Sweep",
-"Circles",
-"Solid",
-"Demo"
-]
-mode = 0
 inMenu = true
+inDemoMode = false
+let demoDuration = 5
+let tileDisplay = Kitronik_Zip_Tile.createZIPTileDisplay(1, 1, Kitronik_Zip_Tile.UBitLocations.Hidden)
 tileDisplay.clear()
 tileDisplay.show()
+modeOptions = ["Rnd", "Solid", "Demo"]
+mode = 0
+loops.everyInterval(demoDuration * 1000, function () {
+    if (inDemoMode) {
+        IncrementMode()
+        if (modeOptions[mode] == "Demo") {
+            IncrementMode()
+        }
+        inMenu = true
+        basic.pause(1000)
+        inMenu = false
+    }
+})
 loops.everyInterval(500, function () {
     if (inMenu) {
-        tileDisplay.clear()
-        tileDisplay.clear()
-        tileDisplay.scrollText(
-        modeOptions[mode],
-        Kitronik_Zip_Tile.TextDirection.Left,
-        25,
-        Kitronik_Zip_Tile.TextStyle.None,
-        Kitronik_Zip_Tile.colors(ZipLedColors.White),
-        Kitronik_Zip_Tile.colors(ZipLedColors.White)
-        )
+        basic.clearScreen()
+        basic.showString("" + modeOptions[mode], 50)
     }
 })
 basic.forever(function () {
-	
+    while (true) {
+        if (!(inMenu)) {
+            if (modeOptions[mode] == "Rnd") {
+                Random()
+            } else if (modeOptions[mode] == "Solid") {
+                Solid(125, 125, 0)
+            }
+        }
+        basic.pause(100)
+    }
 })

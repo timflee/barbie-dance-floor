@@ -1,14 +1,81 @@
-def random():
-    pass
+def Random():
+    while not (inMenu):
+        led.toggle(randint(0, 4), randint(0, 4))
+        basic.pause(10)
+def IncrementMode():
+    global mode
+    if inMenu:
+        music.play_tone(523, music.beat(BeatFraction.SIXTEENTH))
+        if mode >= len(modeOptions) - 1:
+            mode = 0
+        else:
+            mode += 1
+
+def on_button_pressed_a():
+    DecrementMode()
+input.on_button_pressed(Button.A, on_button_pressed_a)
+
+def on_button_pressed_b():
+    IncrementMode()
+input.on_button_pressed(Button.B, on_button_pressed_b)
+
+def Solid(red: number, green: number, blue: number):
+    basic.show_leds("""
+        # # # # #
+                # # # # #
+                # # # # #
+                # # # # #
+                # # # # #
+    """)
+    while not (inMenu):
+        basic.pause(10)
 
 def on_logo_pressed():
-    pass
+    global inMenu
+    music.play_tone(988, music.beat(BeatFraction.SIXTEENTH))
+    inMenu = not (inMenu)
 input.on_logo_event(TouchButtonEvent.PRESSED, on_logo_pressed)
 
+def DecrementMode():
+    global mode
+    if inMenu:
+        music.play_tone(262, music.beat(BeatFraction.SIXTEENTH))
+        if mode <= 0:
+            mode = len(modeOptions) - 1
+        else:
+            mode += -1
+inMenu = False
+modeOptions: List[str] = []
+mode = 0
+inMenu = True
+inDemoMode = False
+demoDuration = 2
+loopNumber = 0
 tileDisplay = Kitronik_Zip_Tile.create_zip_tile_display(1, 1, Kitronik_Zip_Tile.UBitLocations.HIDDEN)
-modeOptions = ["Random", "Sweep", "Circles"]
 tileDisplay.clear()
+tileDisplay.show()
+modeOptions = ["Rnd", "Sweep", "Circles", "Solid", "Demo"]
+mode = 0
+
+def on_every_interval():
+    if inDemoMode:
+        IncrementMode()
+        if modeOptions[mode] == "Demo":
+            IncrementMode()
+loops.every_interval(demoDuration * 1000, on_every_interval)
+
+def on_every_interval2():
+    if inMenu:
+        basic.clear_screen()
+        basic.show_string("" + modeOptions[mode], 50)
+loops.every_interval(500, on_every_interval2)
 
 def on_forever():
-    pass
+    while True:
+        if not (inMenu):
+            if modeOptions[mode] == "Rnd":
+                Random()
+            elif modeOptions[mode] == "Solid":
+                Solid(125, 125, 0)
+            basic.pause(10)
 basic.forever(on_forever)
