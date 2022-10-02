@@ -1,9 +1,13 @@
 def Random():
     while not (inMenu):
         led.toggle(randint(0, 4), randint(0, 4))
-        basic.pause(10)
+        tileDisplay.set_matrix_color(randint(0, 7),
+            randint(0, 7),
+            Kitronik_Zip_Tile.rgb(randint(5, 255), randint(5, 255), randint(5, 255)))
+        tileDisplay.show()
+        basic.pause(200)
 def Circles():
-    basic.show_icon(IconNames.DIAMOND,10)
+    basic.show_icon(IconNames.DIAMOND, 10)
 def IncrementMode():
     global mode
     if inMenu or inDemoMode:
@@ -29,15 +33,18 @@ def Solid(red: number, green: number, blue: number):
                 # # # # #
                 # # # # #
     """)
+    tileDisplay.show_rainbow(1, 360)
     while not (inMenu):
-        basic.pause(10)
+        basic.pause(50)
 
 def on_logo_pressed():
     global inDemoMode, inMenu
     music.play_tone(988, music.beat(BeatFraction.SIXTEENTH))
+    if inDemoMode:
+        inDemoMode = False
     if inMenu:
         if modeOptions[mode] == "Demo":
-            inDemoMode = not (inDemoMode)
+            inDemoMode = True
             IncrementMode()
     inMenu = not (inMenu)
 input.on_logo_event(TouchButtonEvent.PRESSED, on_logo_pressed)
@@ -50,6 +57,7 @@ def DecrementMode():
             mode = len(modeOptions) - 1
         else:
             mode += -1
+tileDisplay: Kitronik_Zip_Tile.ZIPTileDisplay = None
 inDemoMode = False
 inMenu = False
 modeOptions: List[str] = []
@@ -58,9 +66,10 @@ inMenu = True
 inDemoMode = False
 demoDuration = 5
 tileDisplay = Kitronik_Zip_Tile.create_zip_tile_display(1, 1, Kitronik_Zip_Tile.UBitLocations.HIDDEN)
+tileDisplay.set_brightness(20)
 tileDisplay.clear()
 tileDisplay.show()
-modeOptions = ["Rnd", "Solid", "Demo"]
+modeOptions = ["Rnd", "Solid", "Circles", "Demo"]
 mode = 0
 
 def on_every_interval():
@@ -88,6 +97,6 @@ def on_forever():
             elif modeOptions[mode] == "Solid":
                 Solid(125, 125, 0)
             elif modeOptions[mode] == "Circles":
-                pass
+                Circles()
         basic.pause(100)
 basic.forever(on_forever)

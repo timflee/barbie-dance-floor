@@ -1,41 +1,34 @@
 function Random () {
     while (!(inMenu)) {
         led.toggle(randint(0, 4), randint(0, 4))
-        basic.pause(10)
+        tileDisplay.setMatrixColor(randint(0, 7), randint(0, 7), Kitronik_Zip_Tile.rgb(randint(5, 255), randint(5, 255), randint(5, 255)))
+        tileDisplay.show()
+        basic.pause(5)
     }
 }
 function Circles () {
     basic.showIcon(IconNames.Diamond, 10)
 }
 function IncrementMode () {
-    if (inMenu || inDemoMode) {
-        music.playTone(523, music.beat(BeatFraction.Sixteenth))
-        if (mode >= modeOptions.length - 1) {
-            mode = 0
-        } else {
-            mode += 1
-        }
+    music.playTone(523, music.beat(BeatFraction.Sixteenth))
+    if (mode >= modeOptions.length - 1) {
+        mode = 0
+    } else {
+        mode += 1
     }
 }
 input.onButtonPressed(Button.A, function () {
-    DecrementMode()
-})
-input.onButtonPressed(Button.B, function () {
-    IncrementMode()
-})
-function Solid (red: number, green: number, blue: number) {
-    basic.showLeds(`
-        # # # # #
-        # # # # #
-        # # # # #
-        # # # # #
-        # # # # #
-        `)
-    while (!(inMenu)) {
-        basic.pause(10)
+    if (inMenu) {
+        IncrementMode()
+    } else {
+        Brightness = Brightness + 5
+        if (Brightness > 98) {
+            Brightness = 98
+        }
+        tileDisplay.setBrightness(Brightness)
     }
-}
-input.onLogoEvent(TouchButtonEvent.Pressed, function () {
+})
+input.onButtonPressed(Button.AB, function () {
     music.playTone(988, music.beat(BeatFraction.Sixteenth))
     if (inDemoMode) {
         inDemoMode = false
@@ -48,24 +41,55 @@ input.onLogoEvent(TouchButtonEvent.Pressed, function () {
     }
     inMenu = !(inMenu)
 })
-function DecrementMode () {
-    if (inMenu || inDemoMode) {
-        music.playTone(262, music.beat(BeatFraction.Sixteenth))
-        if (mode <= 0) {
-            mode = modeOptions.length - 1
-        } else {
-            mode += -1
+input.onButtonPressed(Button.B, function () {
+    if (inMenu) {
+        DecrementMode()
+    } else {
+        Brightness = Brightness - 5
+        if (Brightness < 3) {
+            Brightness = 3
         }
+        tileDisplay.setBrightness(Brightness)
+    }
+})
+function Solid (red: number, green: number, blue: number) {
+    basic.showLeds(`
+        # # # # #
+        # # # # #
+        # # # # #
+        # # # # #
+        # # # # #
+        `)
+    while (!(inMenu)) {
+        split = randint(1, 360)
+        tileDisplay.showRainbow(randint(1, split), randint(split, 360))
+        basic.pause(200)
     }
 }
+input.onLogoEvent(TouchButtonEvent.Pressed, function () {
+	
+})
+function DecrementMode () {
+    music.playTone(262, music.beat(BeatFraction.Sixteenth))
+    if (mode <= 0) {
+        mode = modeOptions.length - 1
+    } else {
+        mode += -1
+    }
+}
+let split = 0
+let tileDisplay: Kitronik_Zip_Tile.ZIPTileDisplay = null
+let Brightness = 0
 let inDemoMode = false
 let inMenu = false
-let mode = 0
 let modeOptions : string[] = []
+let mode = 0
 inMenu = true
 inDemoMode = false
-let demoDuration = 5
-let tileDisplay = Kitronik_Zip_Tile.createZIPTileDisplay(1, 1, Kitronik_Zip_Tile.UBitLocations.Hidden)
+Brightness = 23
+let demoDuration = 10
+tileDisplay = Kitronik_Zip_Tile.createZIPTileDisplay(1, 1, Kitronik_Zip_Tile.UBitLocations.Hidden)
+tileDisplay.setBrightness(Brightness)
 tileDisplay.clear()
 tileDisplay.show()
 modeOptions = [
